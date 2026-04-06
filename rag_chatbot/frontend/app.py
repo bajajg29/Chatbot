@@ -1,6 +1,9 @@
+import os
 import streamlit as st
 import requests
-API_URL = "http://127.0.0.1:8000/query"
+
+API_URL = os.getenv("API_URL", "http://127.0.0.1:8000/query")
+
 st.title("Document Chatbot")
 
 st.write("Ask questions about the documents like web scrapping.txt and oops_java.pdf!")
@@ -20,7 +23,7 @@ if prompt := st.chat_input("Ask me anything ..."):
     with st.chat_message("ai"):
         with st.spinner("Thinking ..."):
             try:
-                res = requests.post(API_URL, json={"text": prompt})
+                res = requests.post(API_URL, json={"text": prompt}, timeout=30)
                 res.raise_for_status()
                 answer = res.json()["answer"]
                 st.markdown(answer)

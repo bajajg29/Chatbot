@@ -11,12 +11,13 @@ from langchain_classic.chains import create_retrieval_chain
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 
-load_dotenv()
+BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(BASE_DIR / ".env")
 
-FAISS_PATH = "../faiss_index"
+FAISS_PATH = (BASE_DIR / ".." / "faiss_index").resolve()
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-db = FAISS.load_local(FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
+db = FAISS.load_local(str(FAISS_PATH), embeddings, allow_dangerous_deserialization=True)
 
 api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
 if api_key:
@@ -34,8 +35,11 @@ on the provided context. Use the retrieved documents to answer the user's questi
 
 prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", "{input}")])
 
-qa_chain=create_stuff_documents_chain(llm,prompt)
-rag_chain=create_retrieval_chain(retriever, qa_chain)
+if llm:
+    qa_chain = create_stuff_documents_chain(llm, prompt)
+    rag_chain = create_retrieval_chain(retriever, qa_chain)
+else:
+    rag_chain = None
 
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
