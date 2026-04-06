@@ -1,3 +1,4 @@
+python-3.10.13
 pip install
 python-dotenv 
 fastapi "uvicorn[standard]"
