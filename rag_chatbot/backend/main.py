@@ -1,6 +1,7 @@
 import os
 import threading
 from pathlib import Path
+import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -58,3 +59,8 @@ def query_rag(query: Query):
         return {"answer": "API key not configured. Please set GOOGLE_API_KEY or GEMINI_API_KEY environment variable."}
     response = rag_chain.invoke({"input": query.text})
     return {"answer": response.get("answer", "No answer found.")}
+
+
+if __name__ == "__main__":
+    port = int(os.getenv("PORT", "8000"))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
